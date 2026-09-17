@@ -67,6 +67,6 @@ class DatabaseSeeder extends Seeder
 
     private function externalId(int $number): string
     {
-        return '01J'.str_pad((string) $number, 23, '0', STR_PAD_LEFT);
+        return '01J' . str_pad((string) $number, 23, '0', STR_PAD_LEFT);
     }
 }

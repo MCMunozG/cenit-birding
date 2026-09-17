@@ -1,4 +1,67 @@
 <?php
+
 namespace App\Http\Controllers;
-use App\Models\Sighting;use App\Services\LocationPrivacy;use Illuminate\Http\Request;use Illuminate\Support\Facades\Http;
-class SightingController extends Controller {public function store(Request $r,LocationPrivacy $privacy){$d=$r->validate(['species_id'=>'nullable|string|max:26','observed_at'=>'required|date','individuals'=>'nullable|integer|min:1|max:10000','behavior'=>'nullable|string|max:255','notes'=>'nullable|string|max:4000','latitude'=>'required|numeric|between:-90,90','longitude'=>'required|numeric|between:-180,180','region'=>'nullable|string|max:160','publish'=>'boolean']);$sens='HIDDEN';$available=false;if($d['species_id']??null){try{$res=Http::timeout(2)->get(rtrim(config('cenit.catalog_url'),'/').'/api/catalog/v1/species/'.$d['species_id']);if($res->successful()){$sens=$res->json('sensitivity');$available=true;}}catch(\Throwable){}}$publish=(bool)($d['publish']??false);if($publish&&($d['species_id']??null)&&!$available)return response()->json(['code'=>'CATALOG_UNAVAILABLE','message'=>'Cannot publish while species sensitivity is unavailable; save as draft.'],503);$status=$publish?(($d['species_id']??null)?'PUBLISHED':'NEEDS_IDENTIFICATION'):'DRAFT';$public=$status==='DRAFT'?['public_lat'=>null,'public_lng'=>null,'public_region'=>null]:$privacy->sanitize((float)$d['latitude'],(float)$d['longitude'],$sens,$d['region']??null);$s=Sighting::create(['user_id'=>$r->attributes->get('identity')['id'],'species_id'=>$d['species_id']??null,'observed_at'=>$d['observed_at'],'individuals'=>$d['individuals']??1,'behavior'=>$d['behavior']??null,'notes'=>$d['notes']??null,'status'=>$status,'sensitivity'=>$sens,'private_lat'=>$d['latitude'],'private_lng'=>$d['longitude'],...$public]);return response()->json($this->private($s),201);}public function mine(Request $r){return Sighting::where('user_id',$r->attributes->get('identity')['id'])->latest('observed_at')->paginate(20)->through(fn($s)=>$this->private($s));}public function show(Request $r,Sighting $s){$i=$r->attributes->get('identity');if($s->user_id===$i['id']||array_intersect($i['roles'],['moderator','admin','superadmin']))return $this->private($s);abort(404);}public function map(Request $r){$q=Sighting::whereIn('status',['PUBLISHED','VERIFIED','NEEDS_IDENTIFICATION'])->whereNotNull('public_lat');if($r->filled('species_id'))$q->where('species_id',$r->string('species_id'));return $q->latest('observed_at')->paginate(200)->through(fn($s)=>$this->public($s));}private function public(Sighting $s):array{return ['id'=>$s->id,'species_id'=>$s->species_id,'observed_at'=>$s->observed_at,'individuals'=>$s->individuals,'behavior'=>$s->behavior,'status'=>$s->status,'sensitivity'=>$s->sensitivity,'latitude'=>$s->public_lat,'longitude'=>$s->public_lng,'region'=>$s->public_region];}private function private(Sighting $s):array{return [...$this->public($s),'private_location'=>['latitude'=>$s->private_lat,'longitude'=>$s->private_lng]];}}
+
+use App\Domain\Sightings\CreateSighting;
+use App\Http\Requests\StoreSightingRequest;
+use App\Http\Resources\SightingResource;
+use App\Models\Sighting;
+use Illuminate\Http\Request;
+
+/** HTTP adapter for sighting projections; publication rules live in CreateSighting. */
+class SightingController extends Controller
+{
+    public function store(StoreSightingRequest $request, CreateSighting $createSighting)
+    {
+        $result = $createSighting->handle(
+            $request->validated(),
+            $request->attributes->get('identity')['id'],
+            $request->attributes->get('requestId'),
+        );
+
+        if ($result['catalogUnavailable']) {
+            return response()->json([
+                'code' => 'CATALOG_UNAVAILABLE',
+                'message' => 'Cannot publish while species sensitivity is unavailable; save as draft.',
+            ], 503);
+        }
+
+        return (new SightingResource($result['created'], true))->response()->setStatusCode(201);
+    }
+
+    public function mine(Request $request)
+    {
+        $sightings = Sighting::query()
+            ->where('user_id', $request->attributes->get('identity')['id'])
+            ->latest('observed_at')
+            ->paginate(20);
+
+        return $sightings->through(
+            fn(Sighting $sighting) => (new SightingResource($sighting, true))->resolve(),
+        );
+    }
+
+    public function show(Request $request, Sighting $s)
+    {
+        $identity = $request->attributes->get('identity');
+        $canReview = array_intersect($identity['roles'], ['moderator', 'admin', 'superadmin']);
+
+        abort_unless($s->user_id === $identity['id'] || $canReview, 404);
+
+        return new SightingResource($s, true);
+    }
+
+    /** The public map is deliberately limited to the resource's public projection. */
+    public function map(Request $request)
+    {
+        $query = Sighting::query()
+            ->whereIn('status', ['PUBLISHED', 'VERIFIED', 'NEEDS_IDENTIFICATION'])
+            ->whereNotNull('public_lat');
+
+        if ($request->filled('species_id')) {
+            $query->where('species_id', $request->string('species_id'));
+        }
+
+        return SightingResource::collection($query->latest('observed_at')->paginate(200));
+    }
+}

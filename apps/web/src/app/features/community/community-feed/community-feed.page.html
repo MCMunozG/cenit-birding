@@ -1,0 +1,79 @@
+<section class="page-hero compact">
+  <div class="container">
+    <p class="eyebrow">COMUNIDAD</p>
+    <h1>Comparte lo que el campo te enseñó.</h1>
+    <p>Las publicaciones conectan observaciones, especies, rutas y lugares.</p>
+  </div>
+</section>
+<section class="container section-space pt-4">
+  <div class="community-layout">
+    <aside class="community-side">
+      <h3>En Cénit</h3>
+      <a routerLink="/avistamientos/nuevo">Registrar encuentro</a
+      ><a routerLink="/especies">Consultar especies</a
+      ><a routerLink="/notificaciones">Mis notificaciones</a>
+      <hr />
+      <p class="small text-muted">
+        Comparte con respeto: no expongas señales que puedan poner en riesgo a
+        la fauna.
+      </p>
+    </aside>
+    <div>
+      <div class="composer">
+        <div class="avatar">C</div>
+        <div>
+          <b>¿Qué aprendiste hoy?</b>
+          <p>Comparte una observación, una ruta o una pregunta.</p>
+        </div>
+        <a routerLink="/ingresar" class="btn btn-outline-forest">Publicar</a>
+      </div>
+      @if (communityError()) {
+      <div class="alert alert-warning mt-3">
+        No fue posible actualizar el feed. Vuelve a intentar cuando Community
+        esté disponible.
+      </div>
+      }
+      <div class="feed mt-3">
+        @for (post of feed(); track post.id) {
+        <article class="post-card">
+          <div class="d-flex gap-3">
+            <div class="avatar">
+              {{ post.author_id.slice(0, 1).toUpperCase() }}
+            </div>
+            <div>
+              <b>Miembro de Cénit</b>
+              <p class="small text-muted mb-2">
+                Actividad de campo · {{ post.created_at || "recién" }}
+              </p>
+              <p>
+                {{ post.body || "Compartió una referencia de " +
+                post.reference_type + "." }}
+              </p>
+              <div class="post-actions">
+                <button>♡ Me interesa</button><button>◌ Comentar</button
+                ><button>↗ Compartir</button>
+              </div>
+            </div>
+          </div>
+        </article>
+        } @empty { @for (post of seededPosts; track post.title) {
+        <article class="post-card">
+          <div class="d-flex gap-3">
+            <div class="avatar">{{ post.initial }}</div>
+            <div>
+              <b>{{ post.author }}</b>
+              <p class="small text-muted mb-2">{{ post.time }}</p>
+              <p>{{ post.title }}</p>
+              <div class="post-reference">⌁ {{ post.reference }}</div>
+              <div class="post-actions">
+                <button>♡ Me interesa</button><button>◌ Comentar</button
+                ><button>↗ Compartir</button>
+              </div>
+            </div>
+          </div>
+        </article>
+        } }
+      </div>
+    </div>
+  </div>
+</section>

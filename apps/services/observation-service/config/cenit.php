@@ -10,4 +10,5 @@ return [
     'private_key' => $keyPath(env('JWT_PUBLIC_KEY_PATH'), storage_path('app/keys/jwt-public.pem')),
     'public_key' => $keyPath(env('JWT_PUBLIC_KEY_PATH'), storage_path('app/keys/jwt-public.pem')),
     'catalog_url' => env('CATALOG_URL', 'http://localhost:8002'),
+    'catalog_timeout_seconds' => env('CATALOG_TIMEOUT_SECONDS', 2),
 ];

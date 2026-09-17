@@ -1,0 +1,65 @@
+<section class="page-hero compact">
+  <div class="container">
+    <p class="eyebrow">MAPA PÚBLICO</p>
+    <h1>Observaciones que cuidan el territorio.</h1>
+    <p>
+      Este mapa usa solo las coordenadas públicas autorizadas por Observation.
+    </p>
+  </div>
+</section>
+<section class="container section-space pt-4">
+  <div class="map-layout">
+    <aside class="map-sidebar">
+      <p class="eyebrow text-forest">FILTROS</p>
+      <h3>Avistamientos públicos</h3>
+      <label>Especie</label
+      ><select class="form-select mb-3">
+        <option>Todas las especies</option>
+        @for (s of species(); track s.id) {
+        <option>{{ s.common_name }}</option>
+        }</select
+      ><label>Fecha</label
+      ><select class="form-select mb-4">
+        <option>Últimos 30 días</option>
+        <option>Este año</option>
+      </select>
+      <div class="map-legend">
+        <span><i class="legend-dot exact"></i> Punto autorizado</span
+        ><span><i class="legend-dot approx"></i> Zona aproximada</span
+        ><span><i class="legend-dot hidden"></i> Ubicación reservada</span>
+      </div>
+      <hr />
+      <label for="map-key">Google Maps API key</label
+      ><input
+        id="map-key"
+        class="form-control form-control-sm"
+        type="password"
+        [ngModel]="googleMapsKey()"
+        (ngModelChange)="setGoogleMapsKey($event)"
+        placeholder="Pega tu clave"
+      /><small class="text-muted d-block mt-2"
+        >Se guarda solo en esta sesión del navegador.</small
+      >
+    </aside>
+    <div class="live-map">
+      @if (googleMapsKey()) {
+      <app-google-map
+        [apiKey]="googleMapsKey()"
+        [sightings]="mapSightings()"
+        (mapError)="googleMapError.set($event)"
+      ></app-google-map>
+      } @else {
+      <div class="map-empty">
+        Agrega tu clave de Google Maps para cargar el mapa.<br /><small
+          >La API muestra exclusivamente puntos públicos.</small
+        >
+      </div>
+      } @if (mapError() || googleMapError()) {
+      <div class="map-warning">
+        {{ googleMapError() || "Observation no está disponible para cargar
+        puntos." }}
+      </div>
+      }
+    </div>
+  </div>
+</section>

@@ -25,7 +25,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', 'bio', 'general_location', 'privacy_settings', 'preferences', 'avatar_path',
+        'role',
+        'bio',
+        'general_location',
+        'privacy_settings',
+        'preferences',
+        'avatar_path',
     ];
 
     /**
@@ -48,17 +53,19 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'privacy_settings' => 'array', 'preferences' => 'array',
+            'privacy_settings' => 'array',
+            'preferences' => 'array',
         ];
     }
 
-    public function permissions(): array {
+    public function permissions(): array
+    {
         return match ($this->role) {
-            'superadmin' => ['platform.manage','user.manage','catalog.manage','moderation.manage','sighting.review'],
-            'admin' => ['user.manage','catalog.manage','moderation.manage','sighting.review'],
-            'moderator' => ['report.review','content.hide','sighting.review'],
-            'curator' => ['species.create','species.update','species.media.manage'],
-            default => ['profile.self','sighting.create','post.create','comment.create'],
+            'superadmin' => ['platform.manage', 'user.manage', 'catalog.manage', 'moderation.manage', 'sighting.review'],
+            'admin' => ['user.manage', 'catalog.manage', 'moderation.manage', 'sighting.review'],
+            'moderator' => ['report.review', 'content.hide', 'sighting.review'],
+            'curator' => ['species.create', 'species.update', 'species.media.manage'],
+            default => ['profile.self', 'sighting.create', 'post.create', 'comment.create'],
         };
     }
 }

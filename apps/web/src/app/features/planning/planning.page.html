@@ -1,0 +1,35 @@
+<section class="page-hero compact">
+  <div class="container">
+    <p class="eyebrow">{{ view() === "places" ? "LUGARES" : "RUTAS" }}</p>
+    <h1>
+      {{ view() === "places" ? "El territorio también tiene memoria." : "Camina
+      con una intención." }}
+    </h1>
+    <p>
+      Guarda puntos de interés y planea salidas con información útil de
+      observación.
+    </p>
+  </div>
+</section>
+<section class="container section-space pt-4">
+  <div class="row g-4">
+    @for (card of planningCards; track card.title) {
+    <div class="col-md-4">
+      <article class="planning-card">
+        <div class="planning-image">{{ card.icon }}</div>
+        <p class="mini-label">{{ card.meta }}</p>
+        <h3>{{ card.title }}</h3>
+        <p>{{ card.text }}</p>
+        <button class="btn btn-outline-forest" disabled>
+          Próxima iteración
+        </button>
+      </article>
+    </div>
+    }
+  </div>
+  <div class="feature-notice">
+    <b>En construcción con datos reales.</b> Lugares, rutas y recorridos tienen
+    su frontera definida en Observation; esta interfaz queda preparada mientras
+    se completa el módulo.
+  </div>
+</section>

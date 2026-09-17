@@ -11,14 +11,30 @@ class DatabaseSeeder extends Seeder
     {
         $now = now();
         $species = [
-            ['Barranquero andino', 'EXACT'], ['Tángara azuleja', 'EXACT'], ['Colibrí colirrufo', 'EXACT'],
-            ['Colibrí chillón', 'EXACT'], ['Oropéndola crestada', 'EXACT'], ['Garrapatero común', 'EXACT'],
-            ['Garceta nívea', 'EXACT'], ['Pisingo', 'EXACT'], ['Sirirí común', 'EXACT'],
-            ['Bichofué gritón', 'EXACT'], ['Mirla patinaranja', 'EXACT'], ['Copetón', 'EXACT'],
-            ['Torito cabecirrojo', 'APPROXIMATE'], ['Gallito de roca andino', 'APPROXIMATE'],
-            ['Pava andina', 'APPROXIMATE'], ['Loro orejiamarillo', 'HIDDEN'], ['Cóndor andino', 'HIDDEN'],
-            ['Águila crestada', 'HIDDEN'], ['Reinita crestinegra', 'APPROXIMATE'], ['Cacique candela', 'HIDDEN'],
-            ['Tangara rastrojera', 'EXACT'], ['Carpintero lineado', 'EXACT'], ['Semillero capuchino', 'EXACT'], ['Tangara palmera', 'EXACT'],
+            ['Barranquero andino', 'EXACT'],
+            ['Tángara azuleja', 'EXACT'],
+            ['Colibrí colirrufo', 'EXACT'],
+            ['Colibrí chillón', 'EXACT'],
+            ['Oropéndola crestada', 'EXACT'],
+            ['Garrapatero común', 'EXACT'],
+            ['Garceta nívea', 'EXACT'],
+            ['Pisingo', 'EXACT'],
+            ['Sirirí común', 'EXACT'],
+            ['Bichofué gritón', 'EXACT'],
+            ['Mirla patinaranja', 'EXACT'],
+            ['Copetón', 'EXACT'],
+            ['Torito cabecirrojo', 'APPROXIMATE'],
+            ['Gallito de roca andino', 'APPROXIMATE'],
+            ['Pava andina', 'APPROXIMATE'],
+            ['Loro orejiamarillo', 'HIDDEN'],
+            ['Cóndor andino', 'HIDDEN'],
+            ['Águila crestada', 'HIDDEN'],
+            ['Reinita crestinegra', 'APPROXIMATE'],
+            ['Cacique candela', 'HIDDEN'],
+            ['Tangara rastrojera', 'EXACT'],
+            ['Carpintero lineado', 'EXACT'],
+            ['Semillero capuchino', 'EXACT'],
+            ['Tangara palmera', 'EXACT'],
         ];
         $behaviors = ['Forrajeando en el dosel', 'Vocalizando desde una percha', 'En pareja', 'En grupo pequeño', 'Alimentándose de frutos', 'En vuelo bajo', 'Explorando vegetación densa', 'Descansando en una rama expuesta'];
         $regions = ['Bosque andino', 'Humedal urbano', 'Borde de reserva', 'Sendero de niebla', 'Parque arbolado', 'Quebrada de montaña'];
@@ -39,7 +55,7 @@ class DatabaseSeeder extends Seeder
                     'observed_at' => $now->copy()->subDays(($index * 3) % 120)->subMinutes(($index * 19) % 360),
                     'individuals' => 1 + ($index % 7),
                     'behavior' => $behaviors[$index % count($behaviors)],
-                    'notes' => $name.' registrada durante un recorrido de observación. Se mantuvo distancia y no se alteró el comportamiento del ave.',
+                    'notes' => $name . ' registrada durante un recorrido de observación. Se mantuvo distancia y no se alteró el comportamiento del ave.',
                     'status' => $status,
                     'sensitivity' => $sensitivity,
                     'private_lat' => $latitude,
@@ -56,6 +72,6 @@ class DatabaseSeeder extends Seeder
 
     private function externalId(int $number): string
     {
-        return '01J'.str_pad((string) $number, 23, '0', STR_PAD_LEFT);
+        return '01J' . str_pad((string) $number, 23, '0', STR_PAD_LEFT);
     }
 }

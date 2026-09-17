@@ -1,74 +1,81 @@
-# Arquitectura de software
+# Arquitectura de Cénit Birding
 
-## Objetivo y forma del sistema
+## Propósito y límites
 
-Cénit Birding es un monorepo con una SPA Angular y cuatro aplicaciones Laravel autónomas. La división busca que identidad, catálogo editorial, avistamientos y comunidad evolucionen sin convertir cada entidad en un microservicio separado.
+Cénit Birding es una plataforma de ciencia ciudadana donde el avistamiento es el dato principal. La arquitectura protege dos propiedades antes que la conveniencia de una pantalla: cada dominio tiene una única fuente de verdad y una ubicación sensible nunca se expone por accidente.
 
 ```text
-Angular SPA
-  ├── /api/accounts/...      → Accounts
-  ├── /api/catalog/...       → Catalog
-  ├── /api/observations/...  → Observation ──REST──→ Catalog (al publicar)
-  └── /api/community/...     → Community
+                    Angular SPA
+                         |
+       /api/accounts ----+----> Accounts      : identidad y sesión
+       /api/catalog -----+----> Catalog       : especies y sensibilidad
+       /api/observations-+----> Observation   : avistamientos y geoprivacidad
+       /api/community ---+----> Community     : conversación y moderación
 
-Cada servicio Laravel → su propia base lógica MySQL
+Observation -- REST (sólo al publicar una especie) --> Catalog
 ```
 
-No existe gateway de aplicación. En Docker, Nginx de la web solo enruta por prefijo; en desarrollo, el proxy Angular cumple el mismo papel. La SPA compone las vistas y cada API toma sus propias decisiones de autorización.
+Nginx en Docker y el proxy de Angular en desarrollo únicamente encaminan peticiones por prefijo; no contienen reglas de negocio. Cada servicio Laravel se ejecuta y despliega de forma independiente, con una base MySQL lógica propia.
 
-## Componentes, datos y puertos
+| Componente  | Dueño de                                     | Puerto local | Base lógica         |
+| ----------- | -------------------------------------------- | -----------: | ------------------- |
+| `apps/web`  | experiencia de usuario y composición de APIs |         4200 | —                   |
+| Accounts    | usuarios, perfiles, roles y refresh tokens   |         8001 | `cenit_accounts`    |
+| Catalog     | especies y sensibilidad editorial            |         8002 | `cenit_catalog`     |
+| Observation | avistamientos y proyecciones geográficas     |         8003 | `cenit_observation` |
+| Community   | posts, comentarios, reportes y auditoría     |         8004 | `cenit_community`   |
 
-| Componente | Responsabilidad | Base MySQL | Puerto local |
-|---|---|---|---|
-| `apps/web` | Interfaz Angular, sesión de cliente y composición REST | — | 4200 |
-| Accounts | Registro, login, perfil, roles, JWT y refresh tokens | `cenit_accounts` | 8001 |
-| Catalog | Especies y nivel editorial de sensibilidad | `cenit_catalog` | 8002 |
-| Observation | Borradores/publicación de avistamientos y ubicación privada/pública | `cenit_observation` | 8003 |
-| Community | Feed, posts, comentarios, reacciones, reportes, auditoría y avisos internos | `cenit_community` | 8004 |
+La matriz completa de propiedad y operaciones prohibidas está en [service-boundaries.md](service-boundaries.md).
 
-MySQL puede ejecutarse como un único servidor, pero no como una base compartida. Cada servicio dispone de su propio usuario/configuración, migrations y seeders; la única comunicación admitida entre dominios es mediante sus APIs.
+## Frontend
 
-## Límites y comunicación
+Angular usa componentes standalone y rutas `loadComponent`: la página se descarga al navegar, no al abrir la aplicación. Las pantallas viven bajo `apps/web/src/app/features/<contexto>/<página>/` y cada una tiene un controlador TypeScript y un HTML externo. No existe un componente genérico que decida qué pantalla renderizar.
 
-Accounts emite identidad; sus consumidores reciben el `sub` del JWT como ULID externo, no una copia de la tabla de usuarios. Catalog es fuente de verdad de especies y sensibilidad. Observation conserva avistamientos y coordenadas. Community conserva la conversación y el rastro de moderación, pero no modifica los datos de Observation ni de Catalog.
+```text
+app.routes.ts -> lazy page -> core/api/<servicio>-api.service.ts -> /api/<servicio>/v1
+                    |                  |
+                    |                  +-- contratos en shared/models
+                    +-- HTML externo y estado de esa pantalla
+```
 
-La dependencia síncrona actual es Observation → Catalog cuando se publica un avistamiento con especie. Observation solicita la sensibilidad y falla de manera cerrada si no puede resolverla: deja el elemento sin publicar antes que exponer una ubicación. No hay broker ni eventos de dominio en el MVP; al añadir efectos secundarios no críticos se prevé una outbox por servicio y un consumidor, sin compartir tablas.
+`core` contiene sesión, interceptores, guards y clientes HTTP; `shared` contiene tipos o controles reutilizables sin reglas de dominio. El guard sólo mejora la navegación: cada API continúa verificando identidad y permisos en el servidor. Consulta [frontend-architecture.md](frontend-architecture.md) para las reglas de dependencia y dónde colocar código nuevo.
 
-Los detalles de propiedad y operaciones prohibidas están en [service-boundaries.md](service-boundaries.md).
+## Backend
 
-## Seguridad e identidad
+Cada Laravel aplica esta dirección de dependencias:
 
-1. Accounts autentica al usuario y firma un access token JWT RSA de corta duración.
-2. Catalog, Observation y Community tienen solamente la clave pública, por lo que validan firma, caducidad y claims localmente, sin llamar a Accounts en cada petición.
-3. Accounts guarda refresh tokens con hash y los rota/revoca al renovar o cerrar sesión.
-4. Los controladores Laravel resuelven el actor desde middleware; cada recurso comprueba que su propietario coincide con el `sub` autenticado.
+```text
+Route -> middleware -> FormRequest -> Controller -> caso de uso -> modelo / integración -> JsonResource
+```
 
-El frontend actual guarda el access token en `sessionStorage`. Es una decisión transitoria adecuada para el MVP de SPA, pero una versión de producción con mayor exigencia de seguridad debería usar un BFF y cookies `HttpOnly`/`Secure` para que JavaScript no pueda leer el token.
+- Las rutas versionan el contrato HTTP y asignan middleware.
+- El middleware valida el JWT y entrega una identidad mínima (`id`, roles y permisos) a la petición.
+- Los `FormRequest` validan transporte; el caso de uso decide reglas de negocio.
+- Un cliente de otro servicio es una capa anticorrupción: conoce únicamente su contrato HTTP, timeout y trazabilidad.
+- Los `JsonResource` definen explícitamente qué proyección puede recibir cada consumidor.
 
-## Modelo de privacidad geográfica
+Observation es el primer servicio que aplica todas estas capas: `CreateSighting` decide borrador/publicación, `CatalogSensitivityClient` consulta Catalog y `SightingResource` distingue la vista pública de la privada. Los demás servicios conservan el mismo límite de dominio y deben adoptar estas capas cuando se modifiquen sus casos de uso. La guía está en [backend-application-layers.md](backend-application-layers.md).
 
-La ubicación exacta nace y se almacena únicamente en Observation. Al crear o publicar un avistamiento se guardan representaciones separadas: privada y pública. La API pública nunca deriva coordenadas a partir de los campos privados durante la respuesta.
+## Identidad y privacidad
 
-| Sensibilidad de Catalog | Vista pública de Observation |
-|---|---|
-| `EXACT` | Coordenada original. |
-| `APPROXIMATE` | Centro de una cuadrícula de aproximadamente 5,5 km. |
-| `HIDDEN` | Ninguna coordenada. |
+Accounts firma access tokens RSA de corta duración. Catalog, Observation y Community verifican firma, emisor y vencimiento localmente con la clave pública, por lo que no hacen una llamada a Accounts por petición. Los refresh tokens se almacenan con hash y se rotan en Accounts.
 
-Las consultas de mapa usan solo columnas públicas e indexadas. Las coordenadas privadas se devuelven exclusivamente al propietario. Si se necesita geometría compleja más adelante, MySQL Spatial puede añadirla sin relajar esa separación.
+El cliente guarda los tokens en `sessionStorage` durante el MVP. Es una decisión transitoria documentada: una solución de producción con mayor exposición debe migrar a BFF y cookies `HttpOnly`/`Secure` antes de añadir más datos privados en el navegador.
 
-## Diseño del código
+La posición exacta sólo existe en Observation. Al publicar, Catalog entrega una sensibilidad y Observation calcula una sola vez la proyección pública:
 
-Cada Laravel conserva el flujo HTTP habitual: rutas versionadas → middleware de autenticación/autorización → controlador → modelo/servicio de dominio → migration/seeder. Los puntos con reglas propias están aislados en servicios pequeños: Accounts concentra la emisión/verificación JWT y Observation concentra la transformación `LocationPrivacy`.
+| Sensibilidad  | Resultado público                        |
+| ------------- | ---------------------------------------- |
+| `EXACT`       | coordenada original                      |
+| `APPROXIMATE` | centro de una celda aproximada de 5,5 km |
+| `HIDDEN`      | no hay coordenadas públicas              |
 
-El diseño evita abstracciones prematuras como repositorios genéricos, CQRS o un bus de eventos local porque todavía no aportan una frontera adicional. Las migrations son el contrato del esquema de cada contexto; los seeders suministran un entorno repetible de desarrollo. Los contratos HTTP se documentan de forma inicial en `contracts/openapi/` y deben evolucionar junto a cada endpoint.
+El mapa consulta columnas públicas indexadas; nunca transforma `private_lat` ni `private_lng` al responder. Si Catalog no está disponible al publicar una especie identificada, Observation falla de forma cerrada y el usuario puede guardar un borrador.
 
-## Operación local y despliegue
+## Contratos, operación y evolución
 
-Cada servicio se puede levantar sin Docker desde Git Bash con `bash bin/cenit service serve <servicio>`. El comando aplica migrations y seeders no destructivos antes de iniciar Laravel en el puerto asignado. `bash bin/cenit prepare` realiza esa preparación para las cuatro bases y es el paso recomendado después de crear MySQL local con `infra/mysql/workbench-local.sql`.
+Los contratos HTTP versionados están en `contracts/openapi/` y deben actualizarse en el mismo cambio que una ruta o respuesta. Las migrations son el contrato de persistencia de su servicio; no pueden crear foreign keys ni hacer joins con otra base.
 
-El modo Docker usa `compose.yaml`, un contenedor MySQL 8.4 y la inicialización `infra/mysql/init-databases.sql`. Ambos modos emplean MySQL; PostgreSQL no forma parte de la arquitectura.
+Para desarrollo, `bash bin/cenit prepare` aplica migrations y seeders sin borrar datos. Docker usa `compose.yaml`, MySQL 8.4 y las cuatro bases inicializadas por `infra/mysql/init-databases.sql`. Los detalles diarios están en [development-guide.md](development-guide.md).
 
-## Estado y evolución consciente
-
-El esqueleto implementa autenticación, catálogo, avistamientos con privacidad y la base de comunidad. Aún faltan capacidades completas previstas por el producto —por ejemplo rutas, viajes, medios, identificación asistida y acciones de moderación entre servicios—, por lo que no deben presentarse como terminadas. Antes de producción se requieren pruebas de integración con MySQL, migraciones en un entorno limpio, compilación de Angular, gestión real de secretos, observabilidad y políticas de backup/retención.
+No hay broker en el MVP. Una capacidad futura de notificación, indexación o sincronización debe salir de una outbox del servicio dueño; se evaluará un broker sólo cuando existan varios consumidores o una necesidad real de entrega asíncrona. Las decisiones vigentes están indexadas en [decisions.md](decisions.md).

@@ -2,22 +2,22 @@
 
 ## Propiedad de datos y capacidades
 
-| Servicio | Es dueño de | Puede exponer | No puede almacenar ni modificar |
-|---|---|---|---|
-| Accounts | usuarios, perfiles, roles y refresh tokens | identidad autenticada y JWT | avistamientos, especies, coordenadas o contenido comunitario |
-| Catalog | especies y sensibilidad editorial | ficha y sensibilidad de una especie | usuarios, actividad social o ubicaciones de observación |
-| Observation | avistamientos y sus representaciones geográficas privada/pública | borradores del dueño, avistamientos y mapa público | perfiles completos, tablas de especies o moderación comunitaria |
-| Community | posts, comentarios, reacciones, follows, reportes, auditoría y notificaciones internas | feed y estado de participación | coordenadas, datos privados de avistamientos o edición de especies |
+| Servicio    | Es dueño de                                                                            | Puede exponer                                      | No puede almacenar ni modificar                                    |
+| ----------- | -------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| Accounts    | usuarios, perfiles, roles y refresh tokens                                             | identidad autenticada y JWT                        | avistamientos, especies, coordenadas o contenido comunitario       |
+| Catalog     | especies y sensibilidad editorial                                                      | ficha y sensibilidad de una especie                | usuarios, actividad social o ubicaciones de observación            |
+| Observation | avistamientos y sus representaciones geográficas privada/pública                       | borradores del dueño, avistamientos y mapa público | perfiles completos, tablas de especies o moderación comunitaria    |
+| Community   | posts, comentarios, reacciones, follows, reportes, auditoría y notificaciones internas | feed y estado de participación                     | coordenadas, datos privados de avistamientos o edición de especies |
 
 Un `user_id`, `species_id` o `observation_id` foráneo es una referencia opaca (ULID), no una relación SQL a otro servicio. Cada servicio valida la identidad mediante el JWT y sólo consulta otro dominio por su API cuando la regla lo requiere.
 
 ## Integraciones permitidas
 
-| Consumidor | Proveedor | Motivo | Regla ante fallo |
-|---|---|---|---|
-| SPA Angular | Los cuatro servicios | Componer pantallas y enviar acciones del usuario | Mostrar error de API sin inventar datos. |
-| Observation | Catalog | Obtener sensibilidad al publicar una especie | Fallar cerrando: no publicar y mantener borrador. |
-| Catalog, Observation, Community | Accounts (indirecto) | Verificar JWT con clave pública local | Rechazar token inválido o vencido; no llamada remota por petición. |
+| Consumidor                      | Proveedor            | Motivo                                           | Regla ante fallo                                                   |
+| ------------------------------- | -------------------- | ------------------------------------------------ | ------------------------------------------------------------------ |
+| SPA Angular                     | Los cuatro servicios | Componer pantallas y enviar acciones del usuario | Mostrar error de API sin inventar datos.                           |
+| Observation                     | Catalog              | Obtener sensibilidad al publicar una especie     | Fallar cerrando: no publicar y mantener borrador.                  |
+| Catalog, Observation, Community | Accounts (indirecto) | Verificar JWT con clave pública local            | Rechazar token inválido o vencido; no llamada remota por petición. |
 
 La verificación de JWT no es una dependencia HTTP de Accounts: cada consumidor contiene la clave pública distribuida durante el despliegue.
 

@@ -16,6 +16,14 @@ apps/
 
 Cada servicio Laravel es ejecutable por separado, tiene su propio `.env`, migrations, seeders y base de datos lógica MySQL. No hay foreign keys, modelos compartidos ni consultas entre bases. La SPA integra las APIs REST. Consulta la documentación de diseño en [docs/architecture.md](docs/architecture.md), los [límites de servicio](docs/service-boundaries.md) y los [ADRs](docs/adr).
 
+## Documentación técnica
+
+- [Arquitectura de software](docs/architecture.md): componentes, flujos, límites y decisiones de seguridad.
+- [Estructura del frontend](docs/frontend-architecture.md): ubicación de páginas, clientes HTTP y reglas de dependencia.
+- [Capas de los servicios Laravel](docs/backend-application-layers.md) y [guía de código](docs/service-code-guide.md).
+- [Guía de desarrollo](docs/development-guide.md): cómo añadir pantallas, endpoints y pruebas.
+- [Límites de servicio](docs/service-boundaries.md), [decisiones (ADR)](docs/decisions.md) y contratos [OpenAPI](contracts/openapi/).
+
 ## Requisitos
 
 - Git Bash en Windows.
@@ -82,18 +90,18 @@ bash bin/cenit fresh observation
 
 ### Comandos disponibles
 
-| Comando | Efecto |
-|---|---|
-| `bash bin/cenit prepare [servicio]` | Migra y ejecuta seeders sin borrar datos. |
-| `bash bin/cenit migrate [servicio]` | Ejecuta solo migraciones pendientes. |
-| `bash bin/cenit seed [servicio]` | Ejecuta solo seeders. |
-| `bash bin/cenit fresh [servicio]` | Reinicia el esquema con `migrate:fresh --seed`; destructivo. |
-| `bash bin/cenit test [servicio]` | Ejecuta las pruebas Laravel. |
-| `bash bin/cenit service serve <servicio>` | Prepara y sirve un Laravel localmente. |
-| `bash bin/cenit web install` | Instala dependencias npm de Angular. |
-| `bash bin/cenit web serve` | Arranca Angular en desarrollo. |
-| `bash bin/cenit web build` | Genera la compilación de producción de Angular. |
-| `bash bin/cenit up` / `down` | Arranca o detiene el conjunto Docker. |
+| Comando                                   | Efecto                                                       |
+| ----------------------------------------- | ------------------------------------------------------------ |
+| `bash bin/cenit prepare [servicio]`       | Migra y ejecuta seeders sin borrar datos.                    |
+| `bash bin/cenit migrate [servicio]`       | Ejecuta solo migraciones pendientes.                         |
+| `bash bin/cenit seed [servicio]`          | Ejecuta solo seeders.                                        |
+| `bash bin/cenit fresh [servicio]`         | Reinicia el esquema con `migrate:fresh --seed`; destructivo. |
+| `bash bin/cenit test [servicio]`          | Ejecuta las pruebas Laravel.                                 |
+| `bash bin/cenit service serve <servicio>` | Prepara y sirve un Laravel localmente.                       |
+| `bash bin/cenit web install`              | Instala dependencias npm de Angular.                         |
+| `bash bin/cenit web serve`                | Arranca Angular en desarrollo.                               |
+| `bash bin/cenit web build`                | Genera la compilación de producción de Angular.              |
+| `bash bin/cenit up` / `down`              | Arranca o detiene el conjunto Docker.                        |
 
 Los valores posibles de `<servicio>` son `accounts`, `catalog`, `observation` y `community`.
 

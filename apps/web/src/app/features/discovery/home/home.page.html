@@ -1,0 +1,95 @@
+<section class="home-hero">
+  <div class="container hero-grid">
+    <div class="py-5">
+      <p class="eyebrow">OBSERVA · REGISTRA · CONSERVA</p>
+      <h1>Las aves te muestran<br />otro modo de habitar el territorio.</h1>
+      <p class="hero-copy">
+        Descubre especies, planifica salidas y convierte cada observación en
+        conocimiento útil, sin comprometer la fauna sensible.
+      </p>
+      <div class="d-flex flex-wrap gap-3 mt-4">
+        <a class="btn btn-light btn-lg" routerLink="/explorar"
+          >Explorar ahora →</a
+        ><a class="btn btn-ghost-light btn-lg" routerLink="/registro"
+          >Crear mi bitácora</a
+        >
+      </div>
+      <div class="hero-metrics">
+        <div><b>4</b><span>contextos conectados</span></div>
+        <div><b>3</b><span>niveles de privacidad</span></div>
+        <div><b>1</b><span>bitácora para ti</span></div>
+      </div>
+    </div>
+    <div class="hero-orbit">
+      <div class="sun"></div>
+      <div class="bird">⌁</div>
+      <span class="orbit-tag tag-one">Especies</span
+      ><span class="orbit-tag tag-two">Avistamientos</span
+      ><span class="orbit-tag tag-three">Comunidad</span>
+    </div>
+  </div>
+</section>
+<section class="container section-space">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow text-forest">EMPIEZA POR AQUÍ</p>
+      <h2>Una plataforma para salir con los ojos abiertos.</h2>
+    </div>
+    <a routerLink="/explorar" class="text-link">Ver exploración →</a>
+  </div>
+  <div class="row g-4 mt-1">
+    @for (item of journey; track item.title) {
+    <div class="col-md-4">
+      <a class="journey-card" [class]="item.color" [routerLink]="item.link"
+        ><span class="card-index">{{ item.index }}</span>
+        <h3>{{ item.title }}</h3>
+        <p>{{ item.text }}</p>
+        <span class="card-arrow">↗</span></a
+      >
+    </div>
+    }
+  </div>
+</section>
+<section class="container section-space">
+  <div class="row align-items-center g-5">
+    <div class="col-lg-6">
+      <p class="eyebrow text-forest">PRIVACIDAD POR DISEÑO</p>
+      <h2>El dato útil no tiene que poner en riesgo a un ave.</h2>
+      <p class="lead text-secondary">
+        Cada avistamiento separa la ubicación privada de la vista pública. La
+        sensibilidad editorial de la especie siempre tiene prioridad.
+      </p>
+      <div class="privacy-row">
+        <i class="exact">●</i>
+        <div>
+          <b>Exacta</b>
+          <p>Solo cuando la especie y el contexto lo permiten.</p>
+        </div>
+      </div>
+      <div class="privacy-row">
+        <i class="approx">◌</i>
+        <div>
+          <b>Aproximada</b>
+          <p>Se publica una cuadrícula amplia, no el punto de encuentro.</p>
+        </div>
+      </div>
+      <div class="privacy-row">
+        <i class="hidden">—</i>
+        <div>
+          <b>Oculta</b>
+          <p>La observación conserva una referencia general sin coordenadas.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="privacy-map">
+        <div class="map-grid"></div>
+        <span class="map-dot dot-a"></span><span class="map-ring"></span
+        ><span class="map-dot dot-b"></span>
+        <div class="map-note">
+          <b>La precisión importa.</b><br />También importa cuándo no mostrarla.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

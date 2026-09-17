@@ -1,0 +1,44 @@
+<section class="container section-space">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow text-forest">MI BITÁCORA</p>
+      <h1>Mis avistamientos</h1>
+    </div>
+    <a class="btn btn-forest" routerLink="/avistamientos/nuevo"
+      >+ Nuevo registro</a
+    >
+  </div>
+  @if (!hasSession()) {
+  <div class="empty-state">
+    <span>⌁</span>
+    <h3>Tu bitácora empieza con una cuenta.</h3>
+    <p>
+      Ingresa para conservar tus registros privados y compartir los que
+      autorices.
+    </p>
+    <a routerLink="/ingresar" class="btn btn-forest">Ingresar</a>
+  </div>
+  } @else {
+  <div class="record-list">
+    @for (s of mySightings(); track s.id) {
+    <article>
+      <span class="record-date">{{ s.observed_at.slice(0, 10) }}</span>
+      <div>
+        <b>{{ s.species_id || "Sin identificar" }}</b>
+        <p>{{ s.behavior || "Sin nota de comportamiento" }}</p>
+      </div>
+      <span class="status-pill">{{ s.status }}</span>
+    </article>
+    } @empty {
+    <div class="empty-state">
+      <span>◌</span>
+      <h3>Aún no hay registros.</h3>
+      <p>Tu próxima salida puede ser el inicio de tu bitácora.</p>
+      <a routerLink="/avistamientos/nuevo" class="btn btn-forest"
+        >Registrar avistamiento</a
+      >
+    </div>
+    }
+  </div>
+  }
+</section>

@@ -1,0 +1,22 @@
+<section class="container section-space">
+  <p class="eyebrow text-forest">ACTIVIDAD</p>
+  <h1>Notificaciones</h1>
+  <div class="notification-list mt-4">
+    @for (item of notifications(); track item.id) {
+    <article [class.unread]="!item.read_at">
+      <span class="notification-icon">⌁</span>
+      <div>
+        <b>{{ item.type.replace('_', ' ') }}</b>
+        <p>{{ item.body }}</p>
+        <small>{{ item.created_at }}</small>
+      </div>
+    </article>
+    } @empty {
+    <div class="empty-state">
+      <span>◌</span>
+      <h3>No tienes notificaciones pendientes.</h3>
+      <p>La actividad de tu comunidad aparecerá aquí.</p>
+    </div>
+    }
+  </div>
+</section>

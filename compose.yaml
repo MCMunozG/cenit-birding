@@ -3,11 +3,12 @@ services:
   mysql:
     image: mysql:8.4
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-cenit_root_dev}
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-cenit_root_dev}"
       MYSQL_DATABASE: cenit_accounts
       MYSQL_USER: cenit
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-cenit_dev}
-    ports: ["3306:3306"]
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-cenit_dev}"
+    ports:
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./infra/mysql/init-databases.sql:/docker-entrypoint-initdb.d/01-databases.sql:ro
@@ -18,27 +19,73 @@ services:
       retries: 10
   accounts-service:
     build: ./apps/services/accounts-service
-    environment: { APP_ENV: local, DB_CONNECTION: mysql, DB_HOST: mysql, DB_PORT: 3306, DB_DATABASE: cenit_accounts, DB_USERNAME: cenit, DB_PASSWORD: ${MYSQL_PASSWORD:-cenit_dev} }
-    ports: ["8001:8000"]
-    depends_on: { mysql: { condition: service_healthy } }
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: cenit_accounts
+      DB_USERNAME: cenit
+      DB_PASSWORD: "${MYSQL_PASSWORD:-cenit_dev}"
+    ports:
+      - "8001:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
   catalog-service:
     build: ./apps/services/catalog-service
-    environment: { APP_ENV: local, DB_CONNECTION: mysql, DB_HOST: mysql, DB_PORT: 3306, DB_DATABASE: cenit_catalog, DB_USERNAME: cenit, DB_PASSWORD: ${MYSQL_PASSWORD:-cenit_dev} }
-    ports: ["8002:8000"]
-    depends_on: { mysql: { condition: service_healthy } }
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: cenit_catalog
+      DB_USERNAME: cenit
+      DB_PASSWORD: "${MYSQL_PASSWORD:-cenit_dev}"
+    ports:
+      - "8002:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
   observation-service:
     build: ./apps/services/observation-service
-    environment: { APP_ENV: local, DB_CONNECTION: mysql, DB_HOST: mysql, DB_PORT: 3306, DB_DATABASE: cenit_observation, DB_USERNAME: cenit, DB_PASSWORD: ${MYSQL_PASSWORD:-cenit_dev}, CATALOG_URL: http://catalog-service:8000 }
-    ports: ["8003:8000"]
-    depends_on: { mysql: { condition: service_healthy } }
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: cenit_observation
+      DB_USERNAME: cenit
+      DB_PASSWORD: "${MYSQL_PASSWORD:-cenit_dev}"
+      CATALOG_URL: "http://catalog-service:8000"
+    ports:
+      - "8003:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
   community-service:
     build: ./apps/services/community-service
-    environment: { APP_ENV: local, DB_CONNECTION: mysql, DB_HOST: mysql, DB_PORT: 3306, DB_DATABASE: cenit_community, DB_USERNAME: cenit, DB_PASSWORD: ${MYSQL_PASSWORD:-cenit_dev} }
-    ports: ["8004:8000"]
-    depends_on: { mysql: { condition: service_healthy } }
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: cenit_community
+      DB_USERNAME: cenit
+      DB_PASSWORD: "${MYSQL_PASSWORD:-cenit_dev}"
+    ports:
+      - "8004:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
   web:
     build: ./apps/web
-    ports: ["4200:80"]
-    depends_on: [accounts-service, catalog-service, observation-service, community-service]
+    ports:
+      - "4200:80"
+    depends_on:
+      - accounts-service
+      - catalog-service
+      - observation-service
+      - community-service
 volumes:
   mysql-data:
