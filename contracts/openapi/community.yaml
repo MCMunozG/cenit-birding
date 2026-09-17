@@ -1,0 +1,5 @@
+openapi: 3.0.3
+info: {title: Cénit Community API, version: v1}
+paths:
+  /api/community/v1/feed: {get: {summary: Public feed, responses: {'200': {description: OK}}}}
+  /api/community/v1/reports: {post: {summary: Report content, responses: {'201': {description: Created}}}}

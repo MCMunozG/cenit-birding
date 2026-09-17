@@ -1,0 +1,5 @@
+openapi: 3.0.3
+info: {title: Cénit Observations API, version: v1}
+paths:
+  /api/observations/v1/map/sightings: {get: {summary: Sanitized public map data, responses: {'200': {description: OK}}}}
+  /api/observations/v1/sightings: {post: {summary: Create private or published sighting, responses: {'201': {description: Created}, '503': {description: Sensitivity unavailable}}}}

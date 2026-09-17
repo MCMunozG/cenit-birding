@@ -1,0 +1,6 @@
+openapi: 3.0.3
+info: {title: Cénit Accounts API, version: v1}
+paths:
+  /api/accounts/v1/auth/register: {post: {summary: Register a user, responses: {'201': {description: Created}}}}
+  /api/accounts/v1/auth/login: {post: {summary: Obtain an access and refresh token, responses: {'200': {description: OK}}}}
+  /api/accounts/v1/me: {get: {summary: Current profile, responses: {'200': {description: OK}}}}

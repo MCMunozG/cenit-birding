@@ -1,0 +1,5 @@
+openapi: 3.0.3
+info: {title: Cénit Catalog API, version: v1}
+paths:
+  /api/catalog/v1/species: {get: {summary: Public species catalog, responses: {'200': {description: OK}}}}
+  /api/catalog/v1/species/{id}: {get: {summary: Public species record, responses: {'200': {description: OK}}}}

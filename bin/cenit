@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+set -eu
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+ROOT_DIR=$(CDPATH= cd -- "$SCRIPT_DIR/.." && pwd)
+cd "$ROOT_DIR"
+
+command="${1:-help}"
+target="${2:-all}"
+service_dir() {
+  case "$1" in
+    accounts) echo accounts-service;; catalog) echo catalog-service;; observation) echo observation-service;; community) echo community-service;; *) echo "Unknown service: $1" >&2; exit 2;;
+  esac
+}
+service_path() { echo "apps/services/$(service_dir "$1")"; }
+service_port() { case "$1" in accounts) echo 8001;; catalog) echo 8002;; observation) echo 8003;; community) echo 8004;; *) echo "Unknown service: $1" >&2; exit 2;; esac; }
+run_all() { for name in accounts catalog observation community; do (cd "$(service_path "$name")" && php artisan "$@"); done; }
+prepare_service() { (cd "$(service_path "$1")" && php artisan migrate --force && php artisan db:seed --force); }
+prepare_all() { for name in accounts catalog observation community; do prepare_service "$name"; done; }
+case "$command" in
+  up) if [ "$target" = all ]; then docker compose up -d; else docker compose up -d "$(service_dir "$target")"; fi;;
+  down) docker compose down;;
+  migrate|seed|test) if [ "$target" = all ]; then run_all "$command"; else (cd "$(service_path "$target")" && php artisan "$command"); fi;;
+  prepare) if [ "$target" = all ]; then prepare_all; else prepare_service "$target"; fi;;
+  fresh) if [ "$target" = all ]; then run_all migrate:fresh --seed; else (cd "$(service_path "$target")" && php artisan migrate:fresh --seed); fi;;
+  web)
+    action="${2:-serve}"
+    case "$action" in
+      install) (cd apps/web && npm install);;
+      serve|start) (cd apps/web && npm start);;
+      build) (cd apps/web && npm run build);;
+      *) echo 'Usage: bash bin/cenit web {install|serve|build}' >&2; exit 2;;
+    esac;;
+  service)
+    action="${2:?action required}"; name="${3:?service required}"
+    case "$action" in
+      up) docker compose up -d "$(service_dir "$name")";;
+      serve|local) prepare_service "$name" && (cd "$(service_path "$name")" && php artisan serve --host=127.0.0.1 --port="$(service_port "$name")");;
+      *) echo 'Usage: bash bin/cenit service {up|serve} {accounts|catalog|observation|community}' >&2; exit 2;;
+    esac;;
+  *) echo 'Usage: bash bin/cenit {up|down|migrate|seed|prepare|fresh|test} [accounts|catalog|observation|community]'; echo '       bash bin/cenit web {install|serve|build}'; echo '       bash bin/cenit service {up|serve} {accounts|catalog|observation|community}';;
+esac
