@@ -1,20 +1,11 @@
 <?php
 
+/**
+ * Configuración estándar de Laravel para este servicio.
+ * Las decisiones de Cénit y las variables de entorno se documentan en docs/environment-reference.md.
+ */
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
-
-    'postmark' => [
+'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
 

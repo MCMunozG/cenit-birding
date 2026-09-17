@@ -11,8 +11,8 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 
 /**
- * Verifies an Accounts-issued JWT and exposes only its identity claims to the request.
- * Controllers must still check resource ownership or role-specific authorization.
+ * Verifica un JWT emitido por Accounts y expone sólo sus claims de identidad a la petición.
+ * Los controladores aún deben comprobar propiedad del recurso o autorización específica por rol.
  */
 class AuthenticateJwt
 {

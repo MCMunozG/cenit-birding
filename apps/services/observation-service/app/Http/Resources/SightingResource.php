@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Defines the API projection of a sighting. Private coordinates require an explicit opt-in
- * by the owner/moderation endpoint, making accidental exposure in map responses impossible.
+ * Define la proyección API de un avistamiento. Las coordenadas privadas requieren una inclusión
+ * explícita del endpoint de dueño/moderación, impidiendo exponerlas accidentalmente en mapas.
  */
 class SightingResource extends JsonResource
 {
-    /** Keep single-resource responses compatible with the existing REST contract. */
+    /** Mantiene respuestas de recurso único compatibles con el contrato REST existente. */
     public static $wrap = null;
 
     public function __construct(mixed $resource, private readonly bool $includePrivateLocation = false)

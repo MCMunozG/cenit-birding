@@ -6,6 +6,7 @@ use App\Domain\Catalog\CatalogSensitivityClient;
 use App\Models\Sighting;
 use App\Services\LocationPrivacy;
 
+/** Caso de uso que conserva la ubicación privada y decide si existe una proyección pública. */
 class CreateSighting
 {
     public function __construct(
@@ -14,7 +15,7 @@ class CreateSighting
     ) {}
 
     /**
-     * Creates a private record and, only when publication is allowed, its public projection.
+     * Crea un registro privado y, sólo si se permite publicar, su proyección pública.
      *
      * @return array{created: Sighting|null, catalogUnavailable: bool}
      */

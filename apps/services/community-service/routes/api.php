@@ -3,6 +3,7 @@
 use App\Http\Controllers\CommunityController;
 use Illuminate\Support\Facades\Route;
 
+// Contrato HTTP de Community: el feed público no revela identidad autenticada; las mutaciones sí la exigen.
 Route::prefix('community/v1')->group(function () {
     Route::get('health', fn() => ['status' => 'ok', 'service' => 'community-service']);
     Route::get('feed', [CommunityController::class, 'feed']);

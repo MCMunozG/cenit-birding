@@ -5,12 +5,12 @@ namespace App\Domain\Catalog;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Read-only anti-corruption layer for the Catalog contract.
+ * Capa anticorrupción de sólo lectura para el contrato de Catalog.
  */
 class CatalogSensitivityClient
 {
     /**
-     * @return string|null A validated sensitivity, or null when Catalog/network/contract cannot be trusted.
+     * @return string|null Sensibilidad validada o null cuando Catalog, red o contrato no son confiables.
      */
     public function sensitivityFor(string $speciesId, ?string $correlationId = null): ?string
     {

@@ -2,7 +2,7 @@ import { Routes } from "@angular/router";
 import { authenticatedGuard } from "./core/auth.guard";
 
 /**
- * The composition root for navigation. Feature pages stay lazy so a route owns its code split.
+ * Raíz de composición de navegación. Las páginas de feature son diferidas para que cada ruta posea su división de código.
  */
 export const routes: Routes = [
   {

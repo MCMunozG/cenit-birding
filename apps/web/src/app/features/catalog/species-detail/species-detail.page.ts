@@ -9,7 +9,7 @@ import { seedSpecies } from "../../shared/seed-species";
   imports: [RouterLink],
   templateUrl: "./species-detail.page.html",
 })
-/** Resolves one published species, with a development fallback when Catalog is unavailable. */
+/** Resuelve una especie publicada, con respaldo de desarrollo cuando Catalog no está disponible. */
 export class SpeciesDetailPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly catalogApi = inject(CatalogApiService);

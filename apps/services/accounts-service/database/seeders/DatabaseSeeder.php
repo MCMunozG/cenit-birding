@@ -6,8 +6,10 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
+/** Siembra datos repetibles de demostración sin convertirlos en cuentas de producción. */
 class DatabaseSeeder extends Seeder
 {
+    /** Actualiza perfiles de ejemplo y, sólo localmente, el superadministrador documentado. */
     public function run(): void
     {
         $now = now();
@@ -44,12 +46,19 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        $email = env('SUPERADMIN_EMAIL');
-        $password = env('SUPERADMIN_PASSWORD');
-        if ($email && $password) {
+        // Una cuenta predecible permite usar un clon local nuevo inmediatamente. Este seeder
+        // de desarrollo nunca la aprovisiona fuera de APP_ENV=local; las credenciales de
+        // producción deben administrarse explícitamente.
+        if (app()->environment('local')) {
+            $superadmin = config('cenit.local_superadmin');
             User::updateOrCreate(
-                ['email' => $email],
-                ['name' => env('SUPERADMIN_NAME', 'Cénit Superadmin'), 'password' => Hash::make($password), 'role' => 'superadmin', 'email_verified_at' => $now],
+                ['email' => $superadmin['email']],
+                [
+                    'name' => $superadmin['name'],
+                    'password' => Hash::make($superadmin['password']),
+                    'role' => 'superadmin',
+                    'email_verified_at' => $now,
+                ],
             );
         }
     }

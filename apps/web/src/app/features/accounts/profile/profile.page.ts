@@ -14,7 +14,7 @@ import { Sighting } from "../../../shared/models/observation.models";
   imports: [FormsModule, RouterLink],
   templateUrl: "./profile.page.html",
 })
-/** Composes profile data from Accounts with the user's Observation and Community summaries. */
+/** Compone perfil de Accounts con resúmenes personales de Observation y Community. */
 export class ProfilePageComponent {
   private readonly accountsApi = inject(AccountsApiService);
   private readonly observationsApi = inject(ObservationsApiService);
@@ -39,10 +39,12 @@ export class ProfilePageComponent {
     if (this.hasSession()) this.loadProfile();
   }
 
+  /** Evita solicitar datos privados si no existe un access token local. */
   hasSession(): boolean {
     return this.session.hasToken();
   }
 
+  /** Envía únicamente campos editables del perfil; rol y credenciales no se modifican aquí. */
   saveProfile(valid: boolean | null): void {
     if (!valid) return;
     this.profileSaving.set(true);
@@ -70,6 +72,7 @@ export class ProfilePageComponent {
       });
   }
 
+  /** Carga en paralelo el perfil y sus resúmenes sin mezclar propiedad entre servicios. */
   private loadProfile(): void {
     this.profileLoading.set(true);
     this.accountsApi.me().subscribe({
@@ -90,6 +93,7 @@ export class ProfilePageComponent {
       .subscribe({ next: ({ data }) => this.notifications.set(data) });
   }
 
+  /** Normaliza campos opcionales de la API para que el formulario siempre tenga valores editables. */
   private setProfile(profile: UserProfile): void {
     this.profileForm = {
       name: profile.name,

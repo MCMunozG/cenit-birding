@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 /** HTTP adapter for sighting projections; publication rules live in CreateSighting. */
 class SightingController extends Controller
 {
+    /** Delegates publication policy to the use case and translates unavailable Catalog into HTTP 503. */
     public function store(StoreSightingRequest $request, CreateSighting $createSighting)
     {
         $result = $createSighting->handle(
@@ -29,6 +30,7 @@ class SightingController extends Controller
         return (new SightingResource($result['created'], true))->response()->setStatusCode(201);
     }
 
+    /** Returns the owner projection, including private location, for the JWT subject only. */
     public function mine(Request $request)
     {
         $sightings = Sighting::query()
@@ -41,6 +43,7 @@ class SightingController extends Controller
         );
     }
 
+    /** Lets the owner or authorized reviewers inspect a sighting; existence is hidden otherwise. */
     public function show(Request $request, Sighting $s)
     {
         $identity = $request->attributes->get('identity');

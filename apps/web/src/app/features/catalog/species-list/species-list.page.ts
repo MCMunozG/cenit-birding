@@ -10,7 +10,7 @@ import { seedSpecies } from "../../shared/seed-species";
   imports: [FormsModule, RouterLink],
   templateUrl: "./species-list.page.html",
 })
-/** Catalog search state stays local to the species-list route. */
+/** El estado de búsqueda de Catalog permanece local a la ruta de lista de especies. */
 export class SpeciesListPageComponent {
   private readonly catalogApi = inject(CatalogApiService);
   readonly species = signal<Species[]>(seedSpecies);
@@ -21,6 +21,7 @@ export class SpeciesListPageComponent {
     this.loadSpecies();
   }
 
+  /** Carga Catalog y conserva un respaldo visible de desarrollo cuando el servicio no responde. */
   loadSpecies(query = ""): void {
     this.catalogApi.species(query).subscribe({
       next: ({ data }) => {

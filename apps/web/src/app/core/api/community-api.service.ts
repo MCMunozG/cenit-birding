@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { FeedPost, Notification } from "../../shared/models/community.models";
 
-/** Client for Community projections used by the SPA. */
+/** Cliente de proyecciones de Community usado por la SPA. */
 @Injectable({ providedIn: "root" })
 export class CommunityApiService {
   constructor(private readonly http: HttpClient) {}

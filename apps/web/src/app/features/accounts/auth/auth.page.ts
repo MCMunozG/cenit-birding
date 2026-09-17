@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from "@angular/common/http";
 import { Component, inject, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
@@ -9,7 +10,7 @@ import { SessionService } from "../../../core/session.service";
   imports: [FormsModule, RouterLink],
   templateUrl: "./auth.page.html",
 })
-/** Owns login/registration form state and resumes the route captured by the guard. */
+/** Es dueño del estado de login/registro y retoma la ruta capturada por el guarda. */
 export class AuthPageComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -51,12 +52,41 @@ export class AuthPageComponent {
           returnUrl?.startsWith("/") ? returnUrl : "/perfil",
         );
       },
-      error: () => {
-        this.authMessage.set(
-          "No fue posible completar la operación. Revisa tus datos y Accounts.",
-        );
+      error: (error: HttpErrorResponse) => {
+        this.authMessage.set(this.describeAuthError(error));
         this.submitting.set(false);
       },
     });
+  }
+
+  /** Convierte fallos HTTP estables en acciones que puede realizar quien usa el formulario. */
+  private describeAuthError(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return "No se pudo conectar con Accounts. Confirma que el servicio local esté iniciado.";
+    }
+
+    if (error.status === 429) {
+      return "Has hecho varios intentos. Espera un minuto antes de volver a intentarlo.";
+    }
+
+    const code = this.errorCode(error.error);
+    if (this.view() === "login" && code === "INVALID_CREDENTIALS") {
+      return "El correo o la contraseña no son correctos.";
+    }
+
+    if (error.status === 422) {
+      return this.view() === "login"
+        ? "El correo o la contraseña no son correctos."
+        : "Revisa los datos del registro y vuelve a intentarlo.";
+    }
+
+    return "No fue posible completar la operación. Intenta de nuevo en unos momentos.";
+  }
+
+  /** Lee sólo el código público legible por máquina; no muestra mensajes backend literalmente. */
+  private errorCode(body: unknown): string | null {
+    if (!body || typeof body !== "object") return null;
+    const code = (body as { code?: unknown }).code;
+    return typeof code === "string" ? code : null;
   }
 }

@@ -1,6 +1,6 @@
 import { Species } from "../../shared/models/catalog.models";
 
-/** Development-only fallback used when Catalog cannot be reached; it is not a second source of truth. */
+/** Respaldo exclusivo de desarrollo si Catalog no responde; no es una segunda fuente de verdad. */
 export const seedSpecies: Species[] = [
   {
     id: "seed-tangara",

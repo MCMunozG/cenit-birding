@@ -4,7 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/** Crea el almacenamiento privado de avistamientos y su proyección pública intencionalmente separada. */
 return new class extends Migration {
+    /** Persiste ids de contextos externos como ULID opacos, sin claves foráneas entre bases. */
     public function up(): void
     {
         Schema::create('sightings', function (Blueprint $t) {
@@ -25,6 +27,7 @@ return new class extends Migration {
             $t->timestamps();
         });
     }
+    /** Elimina la única tabla de dominio de Observation durante una reversión. */
     public function down(): void
     {
         Schema::dropIfExists('sightings');

@@ -18,6 +18,10 @@ Cada servicio Laravel es ejecutable por separado, tiene su propio `.env`, migrat
 
 ## Documentación técnica
 
+La referencia de variables de entorno está en [docs/environment-reference.md](docs/environment-reference.md). Describe qué configura cada `.env.example`, cuáles secretos no se versionan y cómo funcionan las claves JWT locales.
+
+Para ubicar rápidamente cada componente, servicio, modelo y regla de dominio, consulta la [guía de lectura del código](docs/codebase-guide.md).
+
 - [Arquitectura de software](docs/architecture.md): componentes, flujos, límites y decisiones de seguridad.
 - [Estructura del frontend](docs/frontend-architecture.md): ubicación de páginas, clientes HTTP y reglas de dependencia.
 - [Capas de los servicios Laravel](docs/backend-application-layers.md) y [guía de código](docs/service-code-guide.md).
@@ -38,7 +42,7 @@ Las dependencias Composer, los `.env` de desarrollo y las claves JWT de esta cop
 
 1. En MySQL Workbench, ejecuta una sola vez [infra/mysql/workbench-local.sql](infra/mysql/workbench-local.sql) como usuario administrador. Crea las cuatro bases y el usuario local `cenit` con contraseña `cenit_dev`.
 
-2. Desde cualquier ubicación de Git Bash, prepara las bases. El comando encuentra el repositorio por sí solo; no necesitas entrar en una carpeta de servicio:
+2. Desde cualquier ubicación de Git Bash, prepara las bases. En una copia nueva, el comando crea el `.env` de cada servicio desde su `.env.example` y genera su `APP_KEY` si falta; nunca sobreescribe un `.env` existente. El comando encuentra el repositorio por sí solo; no necesitas entrar en una carpeta de servicio:
 
 ```sh
 bash /c/repositories/cenit-birding/bin/cenit prepare
@@ -68,6 +72,8 @@ bash bin/cenit web serve
 
 La SPA de desarrollo usa su proxy para llegar a los puertos locales. Los servicios escuchan en `8001` (Accounts), `8002` (Catalog), `8003` (Observation) y `8004` (Community). Angular usa el puerto `4200` por defecto.
 
+El comando `service serve` usa `--no-reload` para permitir los workers de PHP configurados por Laravel. Esto evita un warning de desarrollo; sólo significa que, si cambias un `.env`, debes reiniciar ese servicio.
+
 ### Qué hace `prepare`
 
 `prepare` es el comando seguro de inicialización y actualización de desarrollo:
@@ -80,7 +86,9 @@ bash bin/cenit prepare observation      # solo Observation
 bash bin/cenit prepare community        # solo Community
 ```
 
-Para cada servicio ejecuta, en este orden, `php artisan migrate --force` y `php artisan db:seed --force`. Aplica migraciones pendientes y carga/actualiza los datos de semilla; no ejecuta `migrate:fresh` ni borra datos existentes. `bash bin/cenit service serve <servicio>` invoca ese mismo `prepare` para el servicio antes de arrancarlo, por lo que es correcto usar cualquiera de los dos flujos.
+Para cada servicio ejecuta, en este orden, la inicialización segura del entorno, la preparación de claves JWT, `php artisan migrate --force` y `php artisan db:seed --force`. Aplica migraciones pendientes y carga/actualiza los datos de semilla; no ejecuta `migrate:fresh` ni borra datos existentes. `bash bin/cenit service serve <servicio>` invoca ese mismo `prepare` para el servicio antes de arrancarlo, por lo que es correcto usar cualquiera de los dos flujos.
+
+Durante la preparación, Accounts crea el par RSA local si no existe y comparte solamente `jwt-public.pem` con Catalog, Observation y Community. La privada permanece en Accounts y está ignorada por Git. En Docker, el volumen interno `jwt-keys` aplica la misma separación.
 
 `fresh` sí elimina las tablas del servicio indicado y vuelve a sembrarlas; úsalo solo cuando quieras reiniciar datos:
 
@@ -105,11 +113,14 @@ bash bin/cenit fresh observation
 
 Los valores posibles de `<servicio>` son `accounts`, `catalog`, `observation` y `community`.
 
-Para crear el superadministrador durante la primera preparación de Accounts, exporta los valores en esa terminal:
+En entorno local, `prepare accounts` crea o actualiza automáticamente el superadministrador de desarrollo. No uses estas credenciales fuera de tu equipo:
 
-```sh
-SUPERADMIN_EMAIL=admin@cenit.local SUPERADMIN_NAME='Cénit Admin' SUPERADMIN_PASSWORD='cambia-esta-clave' bash bin/cenit prepare accounts
+```text
+Correo: admin@cenit.local
+Contraseña: CenitAdmin2026!
 ```
+
+Puedes sobrescribir esos tres valores en `apps/services/accounts-service/.env` con `SUPERADMIN_EMAIL`, `SUPERADMIN_NAME` y `SUPERADMIN_PASSWORD` antes de ejecutar `prepare accounts`.
 
 Los registros públicos siempre reciben el rol `user`. Los seeders cargan un catálogo inicial de especies y actividad de campo para desarrollo; toda identificación sensible debe validarse con fuentes y expertos antes de cualquier uso científico o de conservación.
 

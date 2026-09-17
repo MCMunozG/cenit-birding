@@ -3,6 +3,7 @@
 use App\Http\Controllers\SpeciesController;
 use Illuminate\Support\Facades\Route;
 
+// Contrato HTTP de Catalog: lectura pública y edición protegida por JWT y rol editorial.
 Route::prefix('catalog/v1')->group(function () {
     Route::get('health', fn() => ['status' => 'ok', 'service' => 'catalog-service']);
     Route::get('species', [SpeciesController::class, 'index']);

@@ -7,13 +7,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * HTTP adapter for the Community context.
+ * Adaptador HTTP para el contexto Community.
  *
- * External identifiers are intentionally stored as opaque values: Community can discuss an
- * observation or species but it never reads or changes another service's database.
+ * Los identificadores externos se almacenan intencionalmente como valores opacos: Community puede
+ * conversar sobre un avistamiento o especie, pero nunca lee ni cambia la base de otro servicio.
  */
 class CommunityController extends Controller
 {
+    /** Devuelve sólo publicaciones públicas; las proyecciones de seguidores/privadas requieren otra política. */
     public function feed()
     {
         return DB::table('posts')
@@ -22,6 +23,7 @@ class CommunityController extends Controller
             ->paginate(20);
     }
 
+    /** Crea una publicación de Community que puede referenciar, pero nunca mutar, una entidad externa. */
     public function post(Request $request)
     {
         $data = $request->validate([
@@ -44,6 +46,7 @@ class CommunityController extends Controller
         return response()->json(DB::table('posts')->find($id), 201);
     }
 
+    /** Persiste un comentario y registra un evento local de notificación. */
     public function comment(Request $request, string $post)
     {
         $data = $request->validate(['body' => 'required|string|max:2000']);
@@ -63,6 +66,7 @@ class CommunityController extends Controller
         return response()->json(['id' => $id], 201);
     }
 
+    /** Hace idempotente una reacción por usuario/publicación mediante la clave única de base. */
     public function react(Request $request, string $post)
     {
         $data = $request->validate(['reaction' => 'required|in:LIKE,LOVE,THANKS']);
@@ -75,6 +79,7 @@ class CommunityController extends Controller
         return response()->noContent();
     }
 
+    /** Hace idempotente seguir sin llamar a Accounts por el usuario referenciado. */
     public function follow(Request $request, string $user)
     {
         DB::table('follows')->updateOrInsert(
@@ -85,6 +90,7 @@ class CommunityController extends Controller
         return response()->noContent();
     }
 
+    /** Abre un reporte de moderación sobre un objetivo local o externo opaco. */
     public function report(Request $request)
     {
         $data = $request->validate([
@@ -107,7 +113,7 @@ class CommunityController extends Controller
         return response()->json(['id' => $id, 'status' => 'OPEN'], 201);
     }
 
-    /** Only a role issued by Accounts can close a report and create the audit entry. */
+    /** Sólo un rol emitido por Accounts puede cerrar un reporte y crear la auditoría. */
     public function moderation(Request $request, string $report)
     {
         $roles = $request->attributes->get('identity')['roles'];
@@ -135,6 +141,7 @@ class CommunityController extends Controller
         return response()->noContent();
     }
 
+    /** Lista notificaciones que pertenecen sólo al sujeto codificado en el JWT. */
     public function notifications(Request $request)
     {
         return DB::table('notifications')
@@ -143,7 +150,7 @@ class CommunityController extends Controller
             ->paginate(20);
     }
 
-    /** Notification persistence stays local to Community and never calls another context. */
+    /** La persistencia de notificaciones permanece local a Community y nunca llama a otro contexto. */
     private function notify(Request $request, string $reference, string $type, string $body): void
     {
         DB::table('notifications')->insert([

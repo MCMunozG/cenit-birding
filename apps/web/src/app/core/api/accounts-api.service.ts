@@ -6,12 +6,12 @@ import {
   UserProfile,
 } from "../../shared/models/accounts.models";
 
-/** HTTP boundary for the Accounts context; it deliberately exposes no session storage. */
+/** Límite HTTP del contexto Accounts; intencionalmente no expone almacenamiento de sesión. */
 @Injectable({ providedIn: "root" })
 export class AccountsApiService {
   constructor(private readonly http: HttpClient) {}
 
-  /** Exchanges credentials for the token pair issued by Accounts. */
+  /** Intercambia credenciales por el par de tokens emitido por Accounts. */
   login(email: string, password: string): Observable<SessionResponse> {
     return this.http.post<SessionResponse>("/api/accounts/v1/auth/login", {
       email,
@@ -19,7 +19,7 @@ export class AccountsApiService {
     });
   }
 
-  /** Uses the API field name at this boundary so pages can keep a TypeScript-friendly name. */
+  /** Usa el nombre de campo de la API aquí para que las páginas mantengan nombres propios de TypeScript. */
   register(
     name: string,
     email: string,

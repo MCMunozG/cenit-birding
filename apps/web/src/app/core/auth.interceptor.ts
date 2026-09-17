@@ -1,6 +1,6 @@
 import { HttpInterceptorFn } from "@angular/common/http";
 
-/** Attaches the current access token; authorization is still enforced by every Laravel API. */
+/** Adjunta el access token actual; cada API Laravel mantiene la autorización en el servidor. */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = sessionStorage.getItem("cenit_access_token");
   return next(

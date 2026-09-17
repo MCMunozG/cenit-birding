@@ -11,7 +11,7 @@ import { seedSpecies } from "../../shared/seed-species";
   imports: [FormsModule, GoogleMapComponent],
   templateUrl: "./new-sighting.page.html",
 })
-/** Captures a private observation; Observation, not this page, decides its public projection. */
+/** Captura una observación privada; Observation, no esta página, decide su proyección pública. */
 export class NewSightingPageComponent {
   private readonly catalogApi = inject(CatalogApiService);
   private readonly observationsApi = inject(ObservationsApiService);
@@ -42,6 +42,7 @@ export class NewSightingPageComponent {
       .subscribe({ next: ({ data }) => this.species.set(data) });
   }
 
+  /** Valida la interfaz, exige sesión y delega sensibilidad/privacidad al backend de Observation. */
   submitSighting(valid: boolean | null): void {
     if (!valid) {
       this.formSuccess.set(false);
@@ -79,15 +80,18 @@ export class NewSightingPageComponent {
       });
   }
 
+  /** Actualiza la clave de Google Maps únicamente en la sesión actual. */
   setGoogleMapsKey(key: string): void {
     this.googleMapError.set("");
     this.googleMapsKey.set(key.trim());
     sessionStorage.setItem("cenit_google_maps_key", key.trim());
   }
+  /** Recibe el punto privado elegido por el componente de mapa y actualiza el borrador. */
   selectMapLocation(location: { latitude: number; longitude: number }): void {
     this.draft.latitude = location.latitude;
     this.draft.longitude = location.longitude;
   }
+  /** Genera un valor local compatible con el control HTML datetime-local. */
   private nowForInput(): string {
     return new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
       .toISOString()

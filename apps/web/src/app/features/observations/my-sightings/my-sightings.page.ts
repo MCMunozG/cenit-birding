@@ -9,6 +9,7 @@ import { Sighting } from "../../../shared/models/observation.models";
   imports: [RouterLink],
   templateUrl: "./my-sightings.page.html",
 })
+/** Lista la proyección privada disponible únicamente para el dueño autenticado. */
 export class MySightingsPageComponent {
   private readonly observationsApi = inject(ObservationsApiService);
   private readonly session = inject(SessionService);
@@ -20,6 +21,7 @@ export class MySightingsPageComponent {
         .mine()
         .subscribe({ next: ({ data }) => this.mySightings.set(data) });
   }
+  /** Evita llamar a Observation si el guarda o la navegación no tiene un token disponible. */
   hasSession(): boolean {
     return this.session.hasToken();
   }

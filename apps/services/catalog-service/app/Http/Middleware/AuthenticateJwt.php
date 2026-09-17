@@ -11,8 +11,8 @@ use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 
 /**
- * Verifies an Accounts-issued JWT and exposes only its identity claims to the request.
- * Catalog uses the public key; it cannot issue tokens.
+ * Verifica un JWT emitido por Accounts y expone sólo sus claims de identidad a la petición.
+ * Catalog usa la clave pública; no puede emitir tokens.
  */
 class AuthenticateJwt
 {
@@ -21,7 +21,11 @@ class AuthenticateJwt
         $raw = $request->bearerToken();
         if (!$raw) return response()->json(['code' => 'UNAUTHENTICATED', 'message' => 'Bearer token required', 'requestId' => $request->attributes->get('requestId')], 401);
         try {
-            $config = Configuration::forAsymmetricSigner(new Sha256(), InMemory::file(config('cenit.private_key')), InMemory::file(config('cenit.public_key')));
+            // Este servicio nunca firma tokens. Lcobucci aún requiere ambas claves
+            // para construir una configuración, por lo que se proporciona la clave pública
+            // en ambas posiciones y sólo se usa en la validación SignedWith de abajo.
+            $publicKey = InMemory::file(config('cenit.public_key'));
+            $config = Configuration::forAsymmetricSigner(new Sha256(), $publicKey, $publicKey);
             $token = $config->parser()->parse($raw);
             if (!$config->validator()->validate($token, new SignedWith(new Sha256(), InMemory::file(config('cenit.public_key')))) || $token->claims()->get('iss') !== config('cenit.issuer') || $token->isExpired(new DateTimeImmutable())) throw new \RuntimeException('Invalid token');
             $request->attributes->set('identity', ['id' => $token->claims()->get('sub'), 'roles' => $token->claims()->get('roles', []), 'permissions' => $token->claims()->get('permissions', [])]);

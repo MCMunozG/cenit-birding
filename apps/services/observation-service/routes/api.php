@@ -3,6 +3,7 @@
 use App\Http\Controllers\SightingController;
 use Illuminate\Support\Facades\Route;
 
+// Contrato HTTP de Observation: el mapa es público y las proyecciones privadas requieren JWT.
 Route::prefix('observations/v1')->group(function () {
     Route::get('health', fn() => ['status' => 'ok', 'service' => 'observation-service']);
     Route::get('map/sightings', [SightingController::class, 'map']);

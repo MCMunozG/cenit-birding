@@ -3,8 +3,8 @@
 namespace App\Services;
 
 /**
- * Produces the persisted public projection once, at publication time.
- * Callers must never use it to turn private database values into a response on demand.
+ * Produce la proyección pública persistida una vez, al momento de publicación.
+ * Quien llama nunca debe usarlo para convertir valores privados de base en una respuesta bajo demanda.
  */
 class LocationPrivacy
 {

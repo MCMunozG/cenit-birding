@@ -6,6 +6,7 @@ import { RouterLink } from "@angular/router";
   imports: [RouterLink],
   templateUrl: "./home.page.html",
 })
+/** Página de entrada que presenta los tres recorridos principales del producto. */
 export class HomePageComponent {
   readonly journey = [
     {

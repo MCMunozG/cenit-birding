@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 
+/** Es dueño de identidad/perfil y traduce el rol almacenado a permisos JWT. */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -17,7 +17,7 @@ class User extends Authenticatable
     protected $keyType = 'string';
 
     /**
-     * The attributes that are mass assignable.
+     * Atributos permitidos para asignación masiva.
      *
      * @var list<string>
      */
@@ -34,7 +34,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Atributos que deben ocultarse al serializar.
      *
      * @var list<string>
      */
@@ -44,7 +44,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * Conversiones de tipo aplicadas a los atributos.
      *
      * @return array<string, string>
      */
@@ -58,6 +58,11 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Devuelve permisos incluidos al emitir el token; los servicios consumidores confían en esta instantánea.
+     *
+     * @return list<string>
+     */
     public function permissions(): array
     {
         return match ($this->role) {

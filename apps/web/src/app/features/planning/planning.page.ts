@@ -2,6 +2,7 @@ import { Component, inject, signal } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 
 @Component({ standalone: true, templateUrl: "./planning.page.html" })
+/** Muestra contenido de planificación reutilizable para lugares y rutas. */
 export class PlanningPageComponent {
   private readonly route = inject(ActivatedRoute);
   readonly view = signal("places");
@@ -26,6 +27,7 @@ export class PlanningPageComponent {
     },
   ];
 
+  /** Lee la variante solicitada sin duplicar el componente ni su plantilla. */
   constructor() {
     this.route.data.subscribe((data) => this.view.set(data["view"]));
   }

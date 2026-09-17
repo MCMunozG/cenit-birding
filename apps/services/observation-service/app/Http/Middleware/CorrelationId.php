@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-/** Carries one request id across HTTP boundaries for logs and the Catalog dependency. */
+/** Transporta un id de petición entre fronteras HTTP para logs y la dependencia Catalog. */
 class CorrelationId
 {
     public function handle(Request $request, Closure $next)

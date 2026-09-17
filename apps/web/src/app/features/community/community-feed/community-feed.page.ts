@@ -8,7 +8,7 @@ import { FeedPost } from "../../../shared/models/community.models";
   imports: [RouterLink],
   templateUrl: "./community-feed.page.html",
 })
-/** Feed-specific state; it does not own posts or moderation rules. */
+/** Estado específico del feed; no es dueño de publicaciones ni reglas de moderación. */
 export class CommunityFeedPageComponent {
   private readonly communityApi = inject(CommunityApiService);
   readonly feed = signal<FeedPost[]>([]);

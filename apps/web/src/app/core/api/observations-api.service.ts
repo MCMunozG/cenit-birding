@@ -6,7 +6,7 @@ import {
   Sighting,
 } from "../../shared/models/observation.models";
 
-/** Client for Observation. It never derives or stores geographic privacy in the browser. */
+/** Cliente de Observation. Nunca deriva ni almacena privacidad geográfica en el navegador. */
 @Injectable({ providedIn: "root" })
 export class ObservationsApiService {
   constructor(private readonly http: HttpClient) {}

@@ -1,3 +1,4 @@
+/** Resumen mínimo de identidad devuelto con un token; no es un perfil completo. */
 export interface SessionUser {
   id: string;
   name: string;
@@ -5,6 +6,7 @@ export interface SessionUser {
   role: string;
 }
 
+/** Par de tokens emitido por Accounts después de registro, inicio de sesión o renovación. */
 export interface SessionResponse {
   access_token: string;
   refresh_token: string;
@@ -13,6 +15,7 @@ export interface SessionResponse {
   user: SessionUser;
 }
 
+/** Datos editables del perfil que pertenece al usuario autenticado actual. */
 export interface UserProfile extends SessionUser {
   bio?: string | null;
   general_location?: string | null;

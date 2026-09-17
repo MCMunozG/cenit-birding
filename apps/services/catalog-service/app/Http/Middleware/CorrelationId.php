@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-/** Returns the incoming request id or creates one so an incident can be followed across services. */
+/** Devuelve el id de petición entrante o crea uno para seguir un incidente entre servicios. */
 class CorrelationId
 {
     public function handle(Request $request, Closure $next)

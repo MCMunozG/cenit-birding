@@ -8,6 +8,7 @@ import { CatalogApiService } from "../../../core/api/catalog-api.service";
   imports: [FormsModule, RouterLink],
   templateUrl: "./explore.page.html",
 })
+/** Pantalla de descubrimiento que delega la búsqueda editorial en Catalog. */
 export class ExplorePageComponent {
   private readonly catalogApi = inject(CatalogApiService);
   searchText = "";
@@ -35,6 +36,7 @@ export class ExplorePageComponent {
     },
   ];
 
+  /** Dispara una consulta de especies desde el texto actual; la lista vive en su propia ruta. */
   loadSpecies(query = this.searchText): void {
     this.catalogApi.species(query).subscribe();
   }

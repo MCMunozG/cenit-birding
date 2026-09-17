@@ -4,7 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/** Creates Catalog's editorial species store and its publication/sensitivity policy. */
 return new class extends Migration {
+    /** Creates the single table owned by this bounded context. */
     public function up(): void
     {
         Schema::create('species', function (Blueprint $t) {
@@ -27,6 +29,7 @@ return new class extends Migration {
             $t->timestamps();
         });
     }
+    /** Drops Catalog's species table during rollback. */
     public function down(): void
     {
         Schema::dropIfExists('species');

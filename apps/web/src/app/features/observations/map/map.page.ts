@@ -11,7 +11,7 @@ import { seedSpecies } from "../../shared/seed-species";
   imports: [FormsModule, GoogleMapComponent],
   templateUrl: "./map.page.html",
 })
-/** Displays only the sanitized map projection returned by Observation. */
+/** Muestra sólo la proyección de mapa saneada devuelta por Observation. */
 export class MapPageComponent {
   private readonly catalogApi = inject(CatalogApiService);
   private readonly observationsApi = inject(ObservationsApiService);
@@ -36,6 +36,7 @@ export class MapPageComponent {
     });
   }
 
+  /** Guarda sólo durante la sesión la clave que permite inicializar el mapa externo. */
   setGoogleMapsKey(key: string): void {
     this.googleMapError.set("");
     this.googleMapsKey.set(key.trim());

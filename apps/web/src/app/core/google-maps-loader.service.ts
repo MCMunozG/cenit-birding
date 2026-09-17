@@ -2,13 +2,13 @@ import { Injectable } from "@angular/core";
 
 declare const google: any;
 
-/** Loads one Google Maps script at a time so simultaneous map pages do not append duplicates. */
+/** Carga un solo script de Google Maps para que páginas simultáneas no agreguen duplicados. */
 @Injectable({ providedIn: "root" })
 export class GoogleMapsLoaderService {
   private loading?: Promise<void>;
   private loadedKey?: string;
 
-  /** The key is supplied by the current browser session and is never persisted by this service. */
+  /** La clave la aporta la sesión actual del navegador y este servicio nunca la persiste. */
   load(apiKey: string): Promise<void> {
     if (!apiKey)
       return Promise.reject(new Error("GOOGLE_MAPS_API_KEY_MISSING"));

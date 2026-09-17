@@ -4,14 +4,16 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/** Transport validation only; sensitivity and publication state are domain decisions. */
+/** Sólo valida el transporte; la sensibilidad y el estado de publicación son decisiones de dominio. */
 class StoreSightingRequest extends FormRequest
 {
+    /** La ruta JWT autentica primero; las políticas de publicación se aplican en CreateSighting. */
     public function authorize(): bool
     {
         return true;
     }
 
+    /** Define sólo forma y límites del transporte HTTP, no sensibilidad biológica. */
     public function rules(): array
     {
         return [

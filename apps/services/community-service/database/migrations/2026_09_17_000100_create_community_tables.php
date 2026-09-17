@@ -4,7 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/** Creates Community-owned interaction, moderation and notification tables. */
 return new class extends Migration {
+    /** Creates all local tables; external entity references intentionally have no foreign keys. */
     public function up(): void
     {
         Schema::create('posts', function (Blueprint $t) {
@@ -67,6 +69,7 @@ return new class extends Migration {
             $t->timestamps();
         });
     }
+    /** Reverses creation in dependency-safe order. */
     public function down(): void
     {
         foreach (['notifications', 'audit_records', 'reports', 'follows', 'reactions', 'comments', 'posts'] as $t) Schema::dropIfExists($t);

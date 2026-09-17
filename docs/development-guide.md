@@ -14,7 +14,11 @@ bash bin/cenit web install
 bash bin/cenit web serve
 ```
 
-`prepare` es seguro para uso cotidiano: aplica migrations pendientes y seeders sin borrar datos. `fresh <servicio>` sí destruye y vuelve a crear el esquema del servicio indicado. Para Docker, copia `.env.example` a `.env` y usa `bash bin/cenit up`.
+`prepare` es seguro para uso cotidiano: si falta, crea el `.env` de cada Laravel desde su `.env.example`, genera `APP_KEY` cuando está vacío, prepara el par RSA de JWT y luego aplica migrations y seeders sin borrar datos. Accounts conserva `jwt-private.pem` y el script distribuye sólo `jwt-public.pem` a Catalog, Observation y Community. No modifica un `.env` existente. `fresh <servicio>` sí destruye y vuelve a crear el esquema del servicio indicado. Para Docker, copia `.env.example` a `.env` y usa `bash bin/cenit up`; el volumen interno `jwt-keys` comparte la clave pública sin incluirla en la imagen ni en Git.
+
+`service serve` añade `--no-reload` al servidor PHP para que Laravel pueda usar `PHP_CLI_SERVER_WORKERS` sin advertencias. El código PHP se sigue evaluando por petición; sólo se requiere reiniciar el proceso después de editar un `.env`.
+
+Si aparece un error con `root@localhost`, contraseña vacía o base `laravel`, el servicio no está leyendo su `.env`. Ejecuta de nuevo `bash bin/cenit prepare`; si el siguiente error menciona el usuario `cenit`, ejecuta antes `infra/mysql/workbench-local.sql` en MySQL Workbench como administrador para crear las cuatro bases y otorgar los permisos locales. El script también imprime esta indicación al fallar.
 
 ## Cómo añadir una pantalla Angular
 

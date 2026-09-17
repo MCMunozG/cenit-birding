@@ -10,17 +10,19 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * Authentication transport. Refresh tokens are hashed before persistence and rotated on use;
- * the raw token only exists in this request/response boundary.
+ * Transporte de autenticación. Los refresh tokens se hashean antes de persistirse y rotan al usarse;
+ * el token en bruto sólo existe en esta frontera de petición/respuesta.
  */
 class AuthController extends Controller
 {
+    /** Registra un usuario público; quien llama no puede elegir un rol privilegiado. */
     public function register(Request $r, JwtService $jwt)
     {
         $data = $r->validate(['name' => 'required|string|max:120', 'email' => 'required|email|unique:users', 'password' => 'required|string|min:12|confirmed']);
         $user = User::create([...$data, 'role' => 'user']);
         return response()->json($this->tokens($user, $jwt), 201);
     }
+    /** Verifica credenciales y devuelve un nuevo par de access/refresh tokens. */
     public function login(Request $r, JwtService $jwt)
     {
         $data = $r->validate(['email' => 'required|email', 'password' => 'required']);
@@ -28,6 +30,7 @@ class AuthController extends Controller
         if (!$user || !Hash::check($data['password'], $user->password)) return response()->json(['code' => 'INVALID_CREDENTIALS', 'message' => 'Invalid credentials'], 422);
         return response()->json($this->tokens($user, $jwt));
     }
+    /** Rota un refresh token válido para que su valor en bruto no pueda reutilizarse. */
     public function refresh(Request $r, JwtService $jwt)
     {
         $data = $r->validate(['refresh_token' => 'required|string']);
@@ -37,12 +40,14 @@ class AuthController extends Controller
         DB::table('refresh_tokens')->where('id', $row->id)->update(['revoked_at' => now()]);
         return response()->json($this->tokens(User::findOrFail($row->user_id), $jwt));
     }
+    /** Revoca el refresh token enviado; los access tokens continúan expirando de forma natural. */
     public function logout(Request $r)
     {
         $data = $r->validate(['refresh_token' => 'required|string']);
         DB::table('refresh_tokens')->where('token_hash', hash('sha256', $data['refresh_token']))->update(['revoked_at' => now()]);
         return response()->noContent();
     }
+    /** Persiste sólo el hash del refresh token y devuelve su contraparte en bruto de un solo uso. */
     private function tokens(User $user, JwtService $jwt): array
     {
         $refresh = Str::random(80);

@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { Species } from "../../shared/models/catalog.models";
 
-/** Read-only client for Catalog; editorial sensitivity is owned by the backend. */
+/** Cliente de sólo lectura para Catalog; el backend es dueño de la sensibilidad editorial. */
 @Injectable({ providedIn: "root" })
 export class CatalogApiService {
   constructor(private readonly http: HttpClient) {}

@@ -4,14 +4,14 @@ import { SessionResponse, SessionUser } from "../shared/models/accounts.models";
 export type { SessionUser } from "../shared/models/accounts.models";
 
 /**
- * Keeps the short-lived SPA session in sessionStorage and mirrors only the user summary as a signal.
- * This is an MVP transport decision; a future BFF must replace it with HttpOnly cookies.
+ * Conserva la sesión de corta duración de la SPA en sessionStorage y refleja sólo el resumen de usuario como signal.
+ * Es una decisión de transporte del MVP; un BFF futuro debe reemplazarla con cookies HttpOnly.
  */
 @Injectable({ providedIn: "root" })
 export class SessionService {
   readonly user = signal<SessionUser | null>(this.readUser());
 
-  /** Persists both tokens together so the UI cannot observe a partially started session. */
+  /** Persiste ambos tokens juntos para que la UI no observe una sesión iniciada parcialmente. */
   start(session: SessionResponse): void {
     sessionStorage.setItem("cenit_access_token", session.access_token);
     sessionStorage.setItem("cenit_refresh_token", session.refresh_token);
@@ -19,7 +19,7 @@ export class SessionService {
     this.user.set(session.user);
   }
 
-  /** Clears local state; server-side refresh-token revocation remains an Accounts API concern. */
+  /** Limpia el estado local; revocar refresh tokens en servidor sigue siendo responsabilidad de Accounts. */
   end(): void {
     sessionStorage.removeItem("cenit_access_token");
     sessionStorage.removeItem("cenit_refresh_token");

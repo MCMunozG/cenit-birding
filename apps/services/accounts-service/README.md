@@ -11,13 +11,18 @@ bash bin/cenit prepare accounts
 bash bin/cenit service serve accounts
 ```
 
-El servicio local escucha en `http://127.0.0.1:8001`. `prepare` aplica migrations y seeders sin borrar datos. La configuración MySQL local estándar es creada por `infra/mysql/workbench-local.sql`; el flujo completo está en el [README raíz](../../../README.md).
+El servicio local escucha en `http://127.0.0.1:8001`. `prepare` prepara claves JWT, aplica migrations y seeders sin borrar datos. La configuración MySQL local estándar es creada por `infra/mysql/workbench-local.sql`; el flujo completo está en el [README raíz](../../../README.md).
 
-Para crear el superadministrador durante la primera siembra:
+En la primera preparación, Accounts crea sus claves RSA de JWT si no existen. La clave privada no sale de este servicio; `bin/cenit` distribuye sólo la pública a los servicios que verifican tokens.
 
-```sh
-SUPERADMIN_EMAIL=admin@cenit.local SUPERADMIN_NAME='Cénit Admin' SUPERADMIN_PASSWORD='cambia-esta-clave' bash bin/cenit prepare accounts
+En `APP_ENV=local`, `prepare accounts` crea o actualiza automáticamente el superadministrador de desarrollo. No uses estas credenciales fuera de tu equipo:
+
+```text
+Correo: admin@cenit.local
+Contraseña: CenitAdmin2026!
 ```
+
+Para sustituirlas localmente, define `SUPERADMIN_EMAIL`, `SUPERADMIN_NAME` y `SUPERADMIN_PASSWORD` en `.env` antes de ejecutar `prepare accounts`.
 
 El registro público genera siempre el rol `user`.
 

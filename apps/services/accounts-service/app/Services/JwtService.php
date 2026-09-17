@@ -9,9 +9,13 @@ use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 
-/** Accounts is the only context allowed to sign access tokens. */
+/** Accounts es el único contexto autorizado para firmar access tokens. */
 class JwtService
 {
+    /**
+     * Firma un access token de corta duración con sólo los claims de identidad que necesitan otros servicios.
+     * El ciclo de vida del refresh token permanece intencionalmente en AuthController y la base de Accounts.
+     */
     public function issue(User $user): string
     {
         $now = new DateTimeImmutable();

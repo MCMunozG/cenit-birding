@@ -19,6 +19,7 @@ declare const google: any;
   selector: "app-google-map",
   templateUrl: "./google-map.component.html",
 })
+/** Conecta el SDK imperativo de Google Maps con inputs Angular y reglas de ubicación pública/privada. */
 export class GoogleMapComponent implements AfterViewInit, OnChanges {
   @Input({ required: true }) apiKey = "";
   @Input() mode: "browse" | "picker" = "browse";
@@ -36,9 +37,11 @@ export class GoogleMapComponent implements AfterViewInit, OnChanges {
   private selectedMarker?: any;
   private publicMarkers: any[] = [];
 
+  /** Crea el mapa sólo después de que exista su elemento anfitrión. */
   ngAfterViewInit(): void {
     this.initialize();
   }
+  /** Reconcilia cambios de inputs sin recrear un mapa ya inicializado. */
   ngOnChanges(): void {
     if (this.map) {
       this.placeSelectedMarker();
@@ -46,6 +49,7 @@ export class GoogleMapComponent implements AfterViewInit, OnChanges {
     } else if (this.mapElement && this.apiKey) this.initialize();
   }
 
+  /** Carga el SDK externo y configura exploración o selección de ubicación privada. */
   initialize(): void {
     this.loader
       .load(this.apiKey)
@@ -73,6 +77,7 @@ export class GoogleMapComponent implements AfterViewInit, OnChanges {
       .catch((error: Error) => this.mapError.emit(error.message));
   }
 
+  /** Redondea y emite al formulario dueño un punto privado elegido por la persona. */
   private select(latitude: number, longitude: number): void {
     this.latitude = Number(latitude.toFixed(7));
     this.longitude = Number(longitude.toFixed(7));
@@ -83,6 +88,7 @@ export class GoogleMapComponent implements AfterViewInit, OnChanges {
     });
   }
 
+  /** Crea o reposiciona el marcador arrastrable usado sólo en modo selector. */
   private placeSelectedMarker(): void {
     if (this.mode !== "picker" || !this.map) return;
     const position = {
@@ -102,6 +108,7 @@ export class GoogleMapComponent implements AfterViewInit, OnChanges {
     } else this.selectedMarker.setPosition(position);
   }
 
+  /** Reemplaza marcadores por las coordenadas públicas suministradas por Observation. */
   private renderPublicMarkers(): void {
     if (!this.map || this.mode !== "browse") return;
     this.publicMarkers.forEach((marker) => marker.setMap(null));

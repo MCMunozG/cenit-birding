@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Configuración estándar de Laravel para este servicio.
+ * Las decisiones de Cénit y las variables de entorno se documentan en docs/environment-reference.md.
+ */
 $keyPath = static function (?string $path, string $fallback): string {
     $path ??= $fallback;
     return preg_match('/^(?:[A-Za-z]:[\\\\\/]|\/)/', $path) ? $path : base_path($path);
@@ -7,6 +11,5 @@ $keyPath = static function (?string $path, string $fallback): string {
 
 return [
     'issuer' => env('JWT_ISSUER', 'cenit-accounts'),
-    'private_key' => $keyPath(env('JWT_PUBLIC_KEY_PATH'), storage_path('app/keys/jwt-public.pem')),
     'public_key' => $keyPath(env('JWT_PUBLIC_KEY_PATH'), storage_path('app/keys/jwt-public.pem')),
 ];
